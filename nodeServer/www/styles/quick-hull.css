@@ -1,0 +1,42 @@
+/**
+ * @author Daniel Oria Martin
+ * @mail alu0101027340@ull.edu.es
+ * @date 23/03/2020
+ * GitHub User: 0ria
+ * Location: Escuela Superior Técnica de Ingenieria de La Laguna
+ * Subject: Programacion de Aplicaciones Interactivas
+ * Assignment: Práctica 6, Algoritmos QuickHull. 
+ * Task: quick-hull
+ * @brief programa que genera un conjunto de puntos aleatorios y halla la envolvente convexa de dichos
+ *     puntos. Se ha implementado con un algortimo conocido llamado QuickHull. El programa está definido
+ *     recursivamente. La visualización se lleva a cabo en un servidor node express.
+ * References:  Tasks:
+ *              https://github.com/fsande/PAI-P06-QuickHull/blob/master/2019-2020_p06_QuickHull.md.
+ */
+body {
+	font-family: sans-serif;
+	text-align: center;
+	padding: 3rem;
+	font-size: 1.125rem;
+	line-height: 1.5;
+	transition: all 725ms ease-in-out;
+	background: white;
+}
+
+h1 {
+	font-size: 2rem;
+	font-weight: bolder;
+	margin-bottom: 1rem;
+	text-align: center;
+}
+
+canvas {
+  background: white;
+  border: 2.5px solid black;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1rem;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}

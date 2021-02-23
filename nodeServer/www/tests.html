@@ -1,0 +1,21 @@
+<html>
+  <body>
+    <link rel="stylesheet" type="text/css" href="/mocha/mocha.css" />
+    <h1>Mocha Tests</h1>
+    <div id="mocha"></div>
+    <script src="mocha/mocha.js"></script>
+    <script src="chai/chai.js"></script>
+    <script>
+      mocha.setup("bdd");
+    </script>
+
+    <script src="scripts/ComplexNumber.js"></script>
+
+    <script src="complexNumberTests.js"></script>
+
+    <script>
+      mocha.run();
+    </script>
+    <a href="index.html"> Go back to docs</a>
+  </body>
+</html>

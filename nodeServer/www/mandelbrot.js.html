@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: mandelbrot.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: mandelbrot.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @author Daniel Oria Martin
+ * @mail alu0101027340@ull.edu.es
+ * @date 29/03/2020
+ * GitHub User: 0ria
+ * Location: Escuela Superior Técnica de Ingenieria de La Laguna
+ * Subject: Programacion de Aplicaciones Interactivas
+ * Assignment: Práctica 7, Mnadelbrot, Gráficos en JS usando canvas. 
+ * Task: mandelbrot
+ * @brief programa que calcula el conjunto de mandelbrot siguiendo la siguiente expresión:
+ *     z = z^2 + c, donde z y c son número complejos.
+ * References:  Tasks:
+ *              https://github.com/fsande/PAI-P06-QuickHull/blob/master/2019-2020_p06_QuickHull.md.
+ */
+'use strict';
+
+const CANVAS = document.getElementById('myCanvas');
+const CTX = CANVAS.getContext('2d');
+const MAXREAL = 0.5;
+const MINREAL = -2;
+const MAXIMAGINARY = 1.125;
+const MINIMAGINARY = 0;
+const MAXITERATIONS = 10000;
+
+/**
+ * @description Clase números complejos, la cual opera con ellos y almacena 
+ *     distintos valores necesarios
+ */
+class ComplexPoint {
+  /**
+   * 
+   * @param {number} realPart Parte real del número
+   * @param {number} imaginaryPart Parte imaginaria del número
+   * @description Método contructor
+   */
+  constructor(realPart, imaginaryPart) {
+    this.realPart = realPart;
+    this.imaginaryPart = imaginaryPart;
+  }
+  /**
+   * 
+   * @param {Object} otherPoint Objecto de la clase punto
+   * @description Método que multiplica un numero complejo con otro
+   */
+  multiplyBy(otherPoint) {
+    this.realPart = (this.realPart * otherPoint.realPart) - 
+        (this.imaginaryPart * otherPoint.imaginaryPart);
+    this.imaginaryPart = (this.realPart * otherPoint.imaginaryPart) +
+        (this.realPart * otherPoint.realPart);
+  }
+  /**
+   * 
+   * @param {Object} otherPoint Objeto de la clase punto
+   * @description Método que suma un numero imaginario con otro
+   */
+  add(otherPoint) {
+    this.realPart = this.realPart + otherPoint.realPart;
+    this.imaginaryPart = this.imaginaryPart + otherPoint.imaginaryPart;
+  }
+  /**
+   * @description Método que calcula el valor absoluto de un número complejo
+   * @returns retorna el valor absoluto de dicho numero
+   */
+  absoluteValue() {
+    this.absVal = Math.sqrt((this.realPart * this.realPart) + (this.imaginaryPart * this.imaginaryPart));
+    return this.absVal;
+  }
+  /**
+   * 
+   * @param {number} position número de iteración en la que se salio del bucle
+   * @description Método que guarda la posición en la que se salió del bucle y setea el valor
+   *     inside a fuera pues no se encuentra dentro del area
+   */
+  nPos(position) {
+    this.posN = position;
+    this.inside = 0;
+  }
+  /**
+   * @description Método que setea el atributo inside a uno
+   */
+  Inside() {
+    this.inside = 1;
+  }
+}
+
+/**
+ * @description Clase mandelbrot en la cual se calcula el área y el error del conjunto
+ */
+class Mandelbrot {
+  /**
+   * 
+   * @param {Array} allPoints Array de objetos puntos complejos
+   * @description Método constructor de la clase, recuenta cuantos puntos hay dentro del área
+   *     y calcula el área y el error
+   */
+  constructor(allPoints) {
+    this.totalInside = 0;
+    for (let point of allPoints) {
+      this.totalInside += point.inside;
+    }
+    this.area = (2 * 2.5 * 1.125 * this.totalInside) / allPoints.length;
+    this.error = this.area / Math.sqrt(allPoints.length);
+    console.log(this.totalInside + ' : ' + allPoints.length);
+  }
+  /**
+   * @description Getter del valor área
+   */
+  get Area() {
+    return this.area;
+  }
+  /**
+   * @description Getter del valor Error
+   */
+  get Error() {
+    return this.error;
+  }
+}
+
+/*
+function hlsToRgb(h, s, v) {
+  if (v > 1) v = 1;
+  let hp = h/60;
+  let c = v * s;
+  let x = c * (1 - Math.abs((hp % 2) - 1));
+  let rgb = [0, 0, 0];
+
+  if (0 &lt;= hp &amp;&amp; hp &lt; 1) rgb = [c, x, 0];
+  if (1 &lt;= hp &amp;&amp; hp &lt; 2) rgb = [x, c, 0];
+  if (2 &lt;= hp &amp;&amp; hp &lt; 3) rgb = [0, c, x];
+  if (3 &lt;= hp &amp;&amp; hp &lt; 4) rgb = [0, x, c];
+  if (4 &lt;= hp &amp;&amp; hp &lt; 5) rgb = [x, 0, c];
+  if (5 &lt;= hp &amp;&amp; hp &lt; 6) rgb = [c, 0, x];
+
+  let m = v - c;
+  rgb[0] += m;
+  rgb[1] += m;
+  rgb[2] += m;
+  rgb[0] *= 255;
+  rgb[1] *= 255;
+  rgb[2] *= 255;
+  return rgb;
+}
+*/
+
+/**
+ * 
+ * @param {Object} mandelbrot Objecto mandelbrot
+ * @description Método que pinta al canvas el área y el error del cojunto 
+ */
+function getAreaAndError(mandelbrot) {
+  //CTX.beginPath();
+  CTX.font = "30px Arial";
+  CTX.fillStyle = "white";
+  CTX.fillText("Area: " + mandelbrot.Area.toFixed(4), 10, 780);
+  CTX.fillText("Error: " + mandelbrot.Error.toFixed(4), 200, 780);
+  //CTX.fill();
+}
+/**
+ * 
+ * @param {Array} allPoints Conjunto de puntos complejos
+ * @description Función que itera por todos los puntos generados categorizandolos dentro
+ *    o fuera del conjunto mandelbrot 
+ */
+function iteratePoints(allPoints) {
+  for (let point of allPoints) {
+    let n = 0;
+    let z = new ComplexPoint(point.realPart, point.imaginaryPart);
+    while (z.absoluteValue() &lt;= 2 &amp;&amp; n &lt; MAXITERATIONS) {
+      z.multiplyBy(z);
+      z.add(point);
+      n += 1;
+    }
+    if (n &lt; MAXITERATIONS) {
+      point.nPos(n);
+    }
+    else {
+      point.Inside();
+    }
+  }
+}
+
+/**
+ * 
+ * @param {number} x Coordenada x
+ * @param {number} y Coordenada y
+ * @param {number} color Valor numérico que varia en base a donde se encuentra el punto
+ */
+function drawPixel(x, y, color) {
+  CTX.fillStyle = 'hsl(241, 100%, ' + color + '%)';
+  CTX.fillRect(x, y, 1, 1);
+}
+
+/**
+ * 
+ * @param {Object} complexPixel Pixel transformado a número complejo
+ * @description Chequea si un punto pertenece al conjunto 
+ * @returns Valor numérico en base a la posición
+ */
+function checkIfBelongsToMandelbrot(complexPixel) {
+  let realComponent = complexPixel.realPart;
+  let imaginaryComponent = complexPixel.imaginaryPart;
+  const maxIter = 105;
+  for (let i = 0; i &lt; maxIter; i++) {
+    let tempRealComponent = realComponent * realComponent - imaginaryComponent * imaginaryComponent + complexPixel.realPart;
+    let temImaginaryComponent = 2 * realComponent * imaginaryComponent + complexPixel.imaginaryPart
+    realComponent = tempRealComponent;
+    imaginaryComponent = temImaginaryComponent;
+    if (realComponent * imaginaryComponent > 5)
+      return (i / maxIter * 100);
+  }
+  return 0;
+}
+
+/**
+ * @description Función que se recorre el canvas pixel a pixel dibujando el Mandelbrot
+ */
+function drawMandelbrot() {
+  let maginifactionFactor = 430; // 430
+  let panX = 2.2; // 2.2
+  let panY = 0.9; // 0.9
+  for (let i = 0; i &lt; CANVAS.width; i++) {
+    for (let j = 0; j &lt; CANVAS.height; j++) {
+      let pixel = new ComplexPoint(i / maginifactionFactor - panX, j / maginifactionFactor - panY);
+      drawPixel(i, j, checkIfBelongsToMandelbrot(pixel));
+    }
+  }
+}
+
+/**
+ * @description Función que genera un número aleatorio entre un intervalo dado
+ */
+function generateRealPart() {
+  return (Math.random() * (MAXREAL - MINREAL) + MINREAL);
+}
+
+/**
+ * @description Función que genera un número aleatorio entre un intervalo dado
+ */
+function generateImaginaryPart() {
+  return (Math.random() * (MAXIMAGINARY - MINIMAGINARY) + MINIMAGINARY);
+}
+
+/**
+ * 
+ * @param {Number} totalNumberPoints Número total de puntos a generar
+ * @description Función que genera Objectos puntos complejos
+ */
+function generateRandomPoints(totalNumberPoints) {
+  let points = [];
+  for (let i = 0; i &lt; totalNumberPoints; i++) {
+    points.push(new ComplexPoint(generateRealPart(), generateImaginaryPart()));
+  }
+  return points;
+}
+
+/**
+ * @description Método principal del programa
+ */
+function main() {
+  drawMandelbrot();
+  let totalNumberPoints = prompt('Enter the total number of points', '0');
+  let allPoints = generateRandomPoints(totalNumberPoints);
+  console.log(allPoints);
+  iteratePoints(allPoints);
+  getAreaAndError(new Mandelbrot(allPoints));
+}
+
+main();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ComplexPoint.html">ComplexPoint</a></li><li><a href="Mandelbrot.html">Mandelbrot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#checkIfBelongsToMandelbrot">checkIfBelongsToMandelbrot</a></li><li><a href="global.html#drawMandelbrot">drawMandelbrot</a></li><li><a href="global.html#drawPixel">drawPixel</a></li><li><a href="global.html#generateImaginaryPart">generateImaginaryPart</a></li><li><a href="global.html#generateRandomPoints">generateRandomPoints</a></li><li><a href="global.html#generateRealPart">generateRealPart</a></li><li><a href="global.html#getAreaAndError">getAreaAndError</a></li><li><a href="global.html#iteratePoints">iteratePoints</a></li><li><a href="global.html#main">main</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Mar 31 2020 22:26:56 GMT+0100 (WEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
